@@ -1,0 +1,3 @@
+Use following command to boot qemu:
+
+qemu -enable-kvm ArchLinux.img -device virtio-serial-pci,id=vsp -chardev socket,server,nowait,path=/tmp/vspagent,id=channel0 -device virtserialport,bus=vsp.0,chardev=channel0,name=vspagent

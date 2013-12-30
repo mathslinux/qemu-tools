@@ -9,11 +9,9 @@ guest-tool img rootfs /dev/nbd0p5 --is-lvm true
 guest-tool img close
 guest-tool file cat /home/vm/foo.txt
 guest-tool file rm /home/vm/foo.txt
-guest-tool config network static --ip 192.168.1.25
-guest-tool config network dhcp
-guest-tool config network mac 00:15:65:45:23:45
+guest-tool config network --static --ip 192.168.1.25 --mac 00:15:65:45:23:45
 guest-tool config hostname foo
-guest-tool config ls
+guest-tool list network
 
 """
 

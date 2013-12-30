@@ -14,7 +14,9 @@ setup(
         'command': [
             'img = img:make',
             'file = file:make',
-            'config = config:make',
+            'network = config:make_network',
+            'hostname = config:make_hostname',
+            'ls = config:make_ls',
         ],
     }
 )

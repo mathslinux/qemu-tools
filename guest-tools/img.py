@@ -51,7 +51,7 @@ def img_rootfs(args):
         os.system('vgchange -ay %s' % args.lvm)
         os.system('mount /dev/%s/root /mnt/guest-tools.mnt' % args.lvm)
     else:
-        os.system('mount %s /mnt/guest-tools.mnt' % (rootfs, args.lvm))
+        os.system('mount %s /mnt/guest-tools.mnt' % (rootfs))
 
 
 def img_close(args):

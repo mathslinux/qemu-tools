@@ -35,12 +35,15 @@ def hostname(args):
 
 
 def ls(args):
-    # TODO:
-    # 1. only show what user want to, not all config
-    # 2. donot hard code os type
+    # TODO: donot hard code os type
     g = DebianFamily()
-    print "Hostname: %s\nIP address: %s\nMAC address: %s\n" \
-        % (g.get_hostname(), g.get_ip(), g.get_mac())
+    if args.subcommand == 'all':
+        print "Hostname: %s\nIP address: %s\nMAC address: %s\n" \
+            % (g.get_hostname(), g.get_ip(), g.get_mac())
+    elif args.subcommand == 'network':
+        print "IP address: %s\nMAC address: %s\n" % (g.get_ip(), g.get_mac())
+    elif args.subcommand == 'hostname':
+        print "Hostname: %s\n" % (g.get_hostname())
 
 
 def make_network(parser):

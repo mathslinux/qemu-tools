@@ -1,5 +1,29 @@
-from ConfigParser import ConfigParser
-import os
+import logging
+
+LOG = logging.getLogger(__name__)
+MNT = '/mnt/guest-tools.mnt'
+
+
+class DebianFamily(object):
+    host_file = MNT + '/etc/hostname'
+    ip_file = MNT + '/etc/network/interfaces'
+    mac_file = MNT + '/etc/udev/rules.d/70-persistent-net.rules'
+
+    def get_hostname(self):
+        try:
+            with open(self.host_file) as f:
+                return f.read().strip('\n')
+        except IOError:
+            LOG.warn('%s not found' % (self.host_file))
+            return ''
+
+    def get_ip(self):
+        """ Not implement"""
+        return ''
+
+    def get_mac(self):
+        """Not implement"""
+        return ''
 
 
 def network(args):
@@ -11,29 +35,12 @@ def hostname(args):
 
 
 def ls(args):
-    # TODO: 1. only show what user want to, not all
-    # get the mount point from temporary config file, not hard code
-    def get_ip(f):
-        return '192.168.176.151'
-
-    def get_mac(f):
-        return '00:15:65:12:34:56'
-    mnt = '/mnt/guest-tools.mnt'
-    hostname = ''
-    ip = ''
-    mac = ''
-    # TODO: centos and other OS support
-    with open(mnt + '/etc/hostname') as f:
-        hostname = f.read().strip('\n')
-    with open(mnt + '/etc/network/interfaces') as f:
-        ip = get_ip(f)
-    with open(mnt + '/etc/udev/rules.d/70-persistent-net.rules') as f:
-        mac = get_mac(f)
-    out = """
-IP address: %s
-MAC address: %s
-Hostname: %s""" % (ip, mac, hostname)
-    print out
+    # TODO:
+    # 1. only show what user want to, not all config
+    # 2. donot hard code os type
+    g = DebianFamily()
+    print "Hostname: %s\nIP address: %s\nMAC address: %s\n" \
+        % (g.get_hostname(), g.get_ip(), g.get_mac())
 
 
 def make_network(parser):

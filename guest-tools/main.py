@@ -18,6 +18,9 @@ guest-tool list network
 import sys
 import argparse
 import pkg_resources
+import logging
+
+LOG = logging.getLogger(__name__)
 
 
 def create_parser():
@@ -44,6 +47,17 @@ def create_parser():
     return parser
 
 
+def set_logger():
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('[%(name)s] [%(levelname)s] %(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+
+
 def main():
     parser = create_parser()
     if len(sys.argv) < 2:
@@ -52,8 +66,9 @@ def main():
     else:
         args = parser.parse_args()
 
-    return args.func(args)
+    set_logger()
 
+    return args.func(args)
 
 if __name__ == '__main__':
     sys.exit(main())

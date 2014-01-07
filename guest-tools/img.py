@@ -2,6 +2,57 @@ import exc
 import commands
 from ConfigParser import ConfigParser
 import os
+import logging
+
+# TODO: wrap the calling of commands.getstatusoutput
+LOG = logging.getLogger(__name__)
+
+
+class ModuleTool(object):
+    def __init__(self, name):
+        self.name = name
+
+    def isload(self):
+        with open('/proc/modules') as f:
+            for l in f:
+                if l.split(' ')[0] == self.name:
+                    return True
+        return False
+
+    def load(self, param=None):
+        cmd = ''
+        if param:
+            p = []
+            for k, v in param.items():
+                p.append('%s=%s' % (k, v))
+            cmd = 'modprobe %s %s' % (self.name, ' '.join(p))
+        else:
+            cmd = 'modprobe %s' % (self.name)
+
+        LOG.debug('load module %s with command: %s' % (self.name, cmd))
+        (status, out) = commands.getstatusoutput(cmd)
+        if status != 0:
+            raise RuntimeError('failed to load module!')
+
+    def unload(self):
+        LOG.debug('unload module %s' % (self.name))
+
+        cmd = 'modprobe -r %s' % (self.name)
+        (status, out) = commands.getstatusoutput(cmd)
+        if status != 0:
+            raise RuntimeError('failed to unload module!')
+
+    def param_value(self, param):
+        module_file = '/sys/module/%s/parameters/%s' % (self.name, param)
+        try:
+            with open(module_file) as f:
+                value = f.read().strip('\n')
+                LOG.debug('get the value of parameter %s of module %s: %s'
+                          % (param, self.name, value))
+                return value
+        except IOError:
+            LOG.error('no such file: %s' % (module_file))
+            return None
 
 
 def img_open(args):
@@ -10,6 +61,16 @@ def img_open(args):
         raise exc.ArgumentError('missing image file')
     else:
         img_file = args.values[0]
+
+    nbd = ModuleTool('nbd')
+    if not nbd.isload():
+        LOG.warning('module nbd has not been loaded, load it')
+        nbd.load({'max_part': 8})
+    if nbd.param_value('max_part') < 4:
+        LOG.warning('the value of max_part of nbd is too small, reload this '
+                    'module with a big value')
+        nbd.unload()
+        nbd.load({'max_part': 8})
 
     # TODO: do not hardcode, do not use print directly
     cmd = 'qemu-nbd -c /dev/nbd0 %s' % img_file
@@ -74,6 +135,7 @@ def img(args):
     guest-tool img rootfs --root /dev/nbd0p5 --lvm true
     guest-tool img close
     """
+    LOG.info('execute command img %s', args.subcommand)
     if args.subcommand == 'open':
         img_open(args)
     elif args.subcommand == 'ls':
